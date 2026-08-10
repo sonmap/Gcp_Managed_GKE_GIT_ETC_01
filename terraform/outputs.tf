@@ -1,0 +1,9 @@
+output "vpc_name" { value = google_compute_network.main.name }
+output "subnet_name" { value = google_compute_subnetwork.main.name }
+output "app_artifact_repository" { value = google_artifact_registry_repository.apps.name }
+output "model_artifact_repository" { value = google_artifact_registry_repository.models.name }
+output "notebook_bucket" { value = google_storage_bucket.notebooks.name }
+output "gke_cluster_name" { value = try(google_container_cluster.autopilot[0].name, null) }
+output "cloud_sql_name" { value = try(google_sql_database_instance.metadata[0].name, null) }
+output "composer_name" { value = try(google_composer_environment.composer[0].name, null) }
+output "composer_dag_gcs_prefix" { value = try(google_composer_environment.composer[0].config[0].dag_gcs_prefix, null) }

@@ -1,0 +1,28 @@
+substitutions:
+  _NOTEBOOK_BUCKET: REPLACE_NOTEBOOK_BUCKET
+
+steps:
+  - id: validate-notebooks
+    name: python:3.12-slim
+    entrypoint: bash
+    args:
+      - -ceu
+      - |
+        python - <<'PY'
+        import json, pathlib
+        for path in pathlib.Path('notebooks').rglob('*.ipynb'):
+            json.loads(path.read_text())
+            print('validated:', path)
+        PY
+
+  - id: sync-approved-templates
+    name: gcr.io/cloud-builders/gcloud
+    args:
+      - storage
+      - rsync
+      - notebooks
+      - gs://${_NOTEBOOK_BUCKET}/notebooks
+      - --recursive
+
+options:
+  logging: CLOUD_LOGGING_ONLY

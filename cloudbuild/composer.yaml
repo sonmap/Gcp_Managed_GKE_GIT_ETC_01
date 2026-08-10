@@ -1,0 +1,43 @@
+substitutions:
+  _REGION: asia-northeast3
+  _COMPOSER_ENV: managed-airflow-dev
+  _COMPOSER_BUCKET: REPLACE_COMPOSER_BUCKET
+
+steps:
+  - id: dag-validation
+    name: python:3.12-slim
+    entrypoint: bash
+    args:
+      - -ceu
+      - |
+        python -m compileall composer/dags
+
+  - id: sync-dags
+    name: gcr.io/cloud-builders/gcloud
+    args:
+      - storage
+      - rsync
+      - composer/dags
+      - gs://${_COMPOSER_BUCKET}/dags
+      - --recursive
+
+  - id: update-pypi
+    name: gcr.io/cloud-builders/gcloud
+    args:
+      - composer
+      - environments
+      - update
+      - ${_COMPOSER_ENV}
+      - --location=${_REGION}
+      - --update-pypi-packages-from-file=composer/requirements.txt
+
+  - id: sync-plugins
+    name: gcr.io/cloud-builders/gcloud
+    entrypoint: bash
+    args:
+      - -ceu
+      - |
+        gcloud storage rsync composer/plugins gs://${_COMPOSER_BUCKET}/plugins --recursive
+
+options:
+  logging: CLOUD_LOGGING_ONLY

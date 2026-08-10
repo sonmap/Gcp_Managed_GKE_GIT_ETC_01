@@ -1,0 +1,61 @@
+substitutions:
+  _REGION: asia-northeast3
+  _AR_REPO: model-images
+  _IMAGE: l2-model
+  _CLUSTER: gke-ai-autopilot
+  _NAMESPACE: model
+
+steps:
+  - id: validate
+    name: python:3.12-slim
+    entrypoint: bash
+    args:
+      - -ceu
+      - |
+        python -m compileall model-src
+
+  - id: build
+    name: gcr.io/cloud-builders/docker
+    args:
+      - build
+      - -t
+      - ${_REGION}-docker.pkg.dev/$PROJECT_ID/${_AR_REPO}/${_IMAGE}:$SHORT_SHA
+      - model-src
+
+  - id: push
+    name: gcr.io/cloud-builders/docker
+    args:
+      - push
+      - ${_REGION}-docker.pkg.dev/$PROJECT_ID/${_AR_REPO}/${_IMAGE}:$SHORT_SHA
+
+  - id: render-manifest
+    name: ubuntu:24.04
+    entrypoint: bash
+    args:
+      - -ceu
+      - |
+        sed 's|IMAGE_PLACEHOLDER|${_REGION}-docker.pkg.dev/$PROJECT_ID/${_AR_REPO}/${_IMAGE}:$SHORT_SHA|g' \
+          model-src/k8s/deployment.yaml > /workspace/deployment.yaml
+
+  - id: credentials
+    name: gcr.io/cloud-builders/gcloud
+    args:
+      - container
+      - clusters
+      - get-credentials
+      - ${_CLUSTER}
+      - --region=${_REGION}
+      - --project=$PROJECT_ID
+
+  - id: deploy
+    name: gcr.io/cloud-builders/kubectl
+    args: [apply, -f, /workspace/deployment.yaml]
+    env:
+      - CLOUDSDK_COMPUTE_REGION=${_REGION}
+      - CLOUDSDK_CONTAINER_CLUSTER=${_CLUSTER}
+
+images:
+  - ${_REGION}-docker.pkg.dev/$PROJECT_ID/${_AR_REPO}/${_IMAGE}:$SHORT_SHA
+
+options:
+  logging: CLOUD_LOGGING_ONLY

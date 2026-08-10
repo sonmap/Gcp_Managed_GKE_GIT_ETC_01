@@ -1,0 +1,34 @@
+# Values for the JupyterHub Helm chart (zero-to-jupyterhub).
+# Review chart-version-specific options before production deployment.
+
+hub:
+  resources:
+    requests:
+      cpu: 500m
+      memory: 512Mi
+
+proxy:
+  chp:
+    resources:
+      requests:
+        cpu: 500m
+        memory: 512Mi
+
+singleuser:
+  image:
+    name: quay.io/jupyter/datascience-notebook
+    tag: python-3.12
+  cpu:
+    guarantee: 1
+  memory:
+    guarantee: 2G
+    limit: 4G
+  storage:
+    type: dynamic
+    capacity: 10Gi
+    dynamic:
+      storageClass: standard-rwo
+  extraEnv:
+    GIT_REPOSITORY_URL: https://github.com/sonmap/Gcp_Managed_GKE_GIT_ETC_01.git
+
+# Production: add SSO/OAuth/IAP authentication and Workload Identity.
