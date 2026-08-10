@@ -1,0 +1,49 @@
+substitutions:
+  _TF_DIR: terraform
+  _TF_STATE_BUCKET: REPLACE_TF_STATE_BUCKET
+  _TF_STATE_PREFIX: managed-platform/dev
+  _TFVARS: envs/dev/terraform.tfvars
+  _APPLY: "false"
+
+steps:
+  - id: fmt
+    name: hashicorp/terraform:1.10.5
+    dir: ${_TF_DIR}
+    args: [fmt, -check, -recursive]
+
+  - id: init
+    name: hashicorp/terraform:1.10.5
+    dir: ${_TF_DIR}
+    args:
+      - init
+      - -backend-config=bucket=${_TF_STATE_BUCKET}
+      - -backend-config=prefix=${_TF_STATE_PREFIX}
+
+  - id: validate
+    name: hashicorp/terraform:1.10.5
+    dir: ${_TF_DIR}
+    args: [validate]
+
+  - id: plan
+    name: hashicorp/terraform:1.10.5
+    dir: ${_TF_DIR}
+    args:
+      - plan
+      - -var-file=${_TFVARS}
+      - -out=/workspace/tfplan
+
+  - id: apply-when-approved
+    name: hashicorp/terraform:1.10.5
+    dir: ${_TF_DIR}
+    entrypoint: sh
+    args:
+      - -ceu
+      - |
+        if [ "${_APPLY}" = "true" ]; then
+          terraform apply -auto-approve /workspace/tfplan
+        else
+          echo "PLAN ONLY: set _APPLY=true only on the approved main/prod trigger"
+        fi
+
+options:
+  logging: CLOUD_LOGGING_ONLY

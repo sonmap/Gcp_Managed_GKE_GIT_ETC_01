@@ -1,0 +1,3 @@
+# Add only additional packages required by your DAGs.
+# Prefer pinned versions after compatibility testing with the selected Composer image.
+requests==2.32.3
