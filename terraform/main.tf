@@ -64,14 +64,14 @@ resource "google_storage_bucket" "notebooks" {
 }
 
 resource "google_container_cluster" "autopilot" {
-  count               = var.enable_gke ? 1 : 0
-  name                = "gke-ai-${var.environment}"
-  location            = var.region
-  enable_autopilot    = true
-  network             = google_compute_network.main.id
-  subnetwork          = google_compute_subnetwork.main.id
+  count            = var.enable_gke ? 1 : 0
+  name             = "gke-ai-${var.environment}"
+  location         = var.region
+  enable_autopilot = true
+  network          = google_compute_network.main.id
+  subnetwork       = google_compute_subnetwork.main.id
 
-    networking_mode = "VPC_NATIVE"
+  networking_mode = "VPC_NATIVE"
 
   ip_allocation_policy {}
 

@@ -3,7 +3,7 @@ region       = "asia-northeast3"
 environment  = "dev"
 network_cidr = "10.20.0.0/20"
 
-enable_gke       = true
+enable_gke       = false
 enable_cloud_sql = false
 enable_composer  = false
 
