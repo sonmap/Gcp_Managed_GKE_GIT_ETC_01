@@ -1,14 +1,46 @@
-variable "project_id" { type = string }
-variable "region" { type = string, default = "asia-northeast3" }
-variable "environment" { type = string, default = "dev" }
-variable "network_cidr" { type = string, default = "10.20.0.0/20" }
+variable "project_id" { 
+  type = string
+}
 
-variable "enable_gke" { type = bool, default = true }
-variable "enable_cloud_sql" { type = bool, default = false }
-variable "enable_composer" { type = bool, default = false }
+variable "region" {
+  type    = string
+  default = "asia-northeast3"
+}
 
-variable "db_version" { type = string, default = "POSTGRES_16" }
-variable "db_tier" { type = string, default = "db-custom-2-7680" }
+variable "environment" {
+  type    = string
+  default = "dev"
+}
+
+variable "network_cidr" {
+  type    = string
+  default = "10.20.0.0/20"
+}
+
+variable "enable_gke" {
+  type    = bool
+  default = true
+}
+
+variable "enable_cloud_sql" {
+  type    = bool
+  default = false
+}
+
+variable "enable_composer" {
+  type    = bool
+  default = false
+}
+
+variable "db_version" {
+  type    = string
+  default = "POSTGRES_16"
+}
+
+variable "db_tier" {
+  type    = string
+  default = "db-custom-2-7680"
+}
 
 variable "composer_image_version" {
   type        = string
