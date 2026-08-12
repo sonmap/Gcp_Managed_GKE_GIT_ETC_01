@@ -1,4 +1,4 @@
-project_id = "REPLACE_DEV_PROJECT_ID"
+project_id = "i-crossbar-476902-j9"
 region = "asia-northeast3"
 environment = "dev"
 network_cidr = "10.20.0.0/20"
