@@ -70,6 +70,16 @@ resource "google_container_cluster" "autopilot" {
   enable_autopilot    = true
   network             = google_compute_network.main.id
   subnetwork          = google_compute_subnetwork.main.id
+
+    networking_mode = "VPC_NATIVE"
+
+  ip_allocation_policy {}
+
+  private_cluster_config {
+    enable_private_nodes    = true
+    enable_private_endpoint = false
+  }
+
   deletion_protection = false
 
   release_channel { channel = "REGULAR" }
