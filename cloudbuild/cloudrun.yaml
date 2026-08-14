@@ -3,11 +3,23 @@ substitutions:
   _AR_REPO: app-images
   _SERVICE: batch-api
   _APP_DIR: cloud-run-src/batch-api
+
+  # Cloud Build 실행용 Service Account
   _BUILD_SA: cb-dev-deployer
 
+  # Cloud Run 애플리케이션 실행용 Service Account
+  _RUNTIME_SA: cr-batch-api-dev
+
+
+# Cloud Build 자체가 사용할 Service Account
 serviceAccount: projects/$PROJECT_ID/serviceAccounts/${_BUILD_SA}@$PROJECT_ID.iam.gserviceaccount.com
 
+
 steps:
+
+  # --------------------------------------------------
+  # 1. Python Source Validation
+  # --------------------------------------------------
   - id: validate
     name: python:3.12-slim
     entrypoint: bash
@@ -16,6 +28,10 @@ steps:
       - |
         python -m compileall ${_APP_DIR}
 
+
+  # --------------------------------------------------
+  # 2. Docker Image Build
+  # --------------------------------------------------
   - id: build
     name: gcr.io/cloud-builders/docker
     args:
@@ -24,12 +40,20 @@ steps:
       - ${_REGION}-docker.pkg.dev/$PROJECT_ID/${_AR_REPO}/${_SERVICE}:$SHORT_SHA
       - ${_APP_DIR}
 
+
+  # --------------------------------------------------
+  # 3. Push Image to Artifact Registry
+  # --------------------------------------------------
   - id: push
     name: gcr.io/cloud-builders/docker
     args:
       - push
       - ${_REGION}-docker.pkg.dev/$PROJECT_ID/${_AR_REPO}/${_SERVICE}:$SHORT_SHA
 
+
+  # --------------------------------------------------
+  # 4. Deploy to Cloud Run
+  # --------------------------------------------------
   - id: deploy
     name: gcr.io/cloud-builders/gcloud
     args:
@@ -38,11 +62,19 @@ steps:
       - ${_SERVICE}
       - --image=${_REGION}-docker.pkg.dev/$PROJECT_ID/${_AR_REPO}/${_SERVICE}:$SHORT_SHA
       - --region=${_REGION}
+      - --project=$PROJECT_ID
       - --platform=managed
+
+      # Cloud Run Runtime Identity
+      - --service-account=${_RUNTIME_SA}@$PROJECT_ID.iam.gserviceaccount.com
+
+      # 외부 Public 접근 금지
       - --no-allow-unauthenticated
+
 
 images:
   - ${_REGION}-docker.pkg.dev/$PROJECT_ID/${_AR_REPO}/${_SERVICE}:$SHORT_SHA
+
 
 options:
   logging: CLOUD_LOGGING_ONLY
