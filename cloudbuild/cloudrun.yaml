@@ -3,6 +3,9 @@ substitutions:
   _AR_REPO: app-images
   _SERVICE: batch-api
   _APP_DIR: cloud-run-src/batch-api
+  _BUILD_SA: cb-dev-deployer
+
+serviceAccount: projects/$PROJECT_ID/serviceAccounts/${_BUILD_SA}@$PROJECT_ID.iam.gserviceaccount.com
 
 steps:
   - id: validate
