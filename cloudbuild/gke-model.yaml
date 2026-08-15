@@ -3,7 +3,6 @@ substitutions:
   _AR_REPO: model-images
   _IMAGE: l2-model
   _CLUSTER: gke-ai-dev
-  _NAMESPACE: model
   _BUILD_SA: cb-gke-dev
 
 serviceAccount: projects/$PROJECT_ID/serviceAccounts/${_BUILD_SA}@$PROJECT_ID.iam.gserviceaccount.com
