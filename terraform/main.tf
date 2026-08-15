@@ -83,6 +83,11 @@ resource "google_container_cluster" "autopilot" {
   deletion_protection = false
 
   release_channel { channel = "REGULAR" }
+
+  depends_on = [
+    google_project_iam_member.gke_node_role,
+    google_artifact_registry_repository_iam_member.gke_model_reader
+  ]
 }
 
 resource "google_compute_global_address" "private_service_range" {
@@ -148,4 +153,34 @@ resource "google_composer_environment" "composer" {
   }
 
   depends_on = [google_project_iam_member.composer_worker]
+}
+
+# ---------------------------------------------------------
+# GKE Autopilot Node Service Account
+# ---------------------------------------------------------
+
+resource "google_service_account" "gke_node" {
+  count = var.enable_gke ? 1 : 0
+
+  account_id   = "gke-node-${var.environment}"
+  display_name = "GKE Autopilot Node Service Account"
+}
+
+resource "google_project_iam_member" "gke_node_role" {
+  count = var.enable_gke ? 1 : 0
+
+  project = var.project_id
+  role    = "roles/container.defaultNodeServiceAccount"
+  member  = "serviceAccount:${google_service_account.gke_node[0].email}"
+}
+
+resource "google_artifact_registry_repository_iam_member" "gke_model_reader" {
+  count = var.enable_gke ? 1 : 0
+
+  project    = var.project_id
+  location   = var.region
+  repository = google_artifact_registry_repository.models.repository_id
+
+  role   = "roles/artifactregistry.reader"
+  member = "serviceAccount:${google_service_account.gke_node[0].email}"
 }
