@@ -2,8 +2,11 @@ substitutions:
   _REGION: asia-northeast3
   _AR_REPO: model-images
   _IMAGE: l2-model
-  _CLUSTER: gke-ai-autopilot
+  _CLUSTER: gke-ai-dev
   _NAMESPACE: model
+  _BUILD_SA: cb-gke-dev
+
+serviceAccount: projects/$PROJECT_ID/serviceAccounts/${_BUILD_SA}@$PROJECT_ID.iam.gserviceaccount.com
 
 steps:
   - id: validate
@@ -49,7 +52,10 @@ steps:
 
   - id: deploy
     name: gcr.io/cloud-builders/kubectl
-    args: [apply, -f, /workspace/deployment.yaml]
+    args:
+      - apply
+      - -f
+      - /workspace/deployment.yaml
     env:
       - CLOUDSDK_COMPUTE_REGION=${_REGION}
       - CLOUDSDK_CONTAINER_CLUSTER=${_CLUSTER}
