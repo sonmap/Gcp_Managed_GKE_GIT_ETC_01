@@ -80,6 +80,12 @@ resource "google_container_cluster" "autopilot" {
     enable_private_endpoint = false
   }
 
+  cluster_autoscaling {
+    auto_provisioning_defaults {
+      service_account = google_service_account.gke_node[0].email
+    }
+  }
+  
   deletion_protection = false
 
   release_channel { channel = "REGULAR" }
@@ -153,6 +159,17 @@ resource "google_composer_environment" "composer" {
   }
 
   depends_on = [google_project_iam_member.composer_worker]
+}
+
+# ---------------------------------------------------------
+# Comoser_gke
+# ---------------------------------------------------------
+resource "google_project_iam_member" "composer_gke_developer" {
+  count = var.enable_composer ? 1 : 0
+
+  project = var.project_id
+  role    = "roles/container.developer"
+  member  = "serviceAccount:${google_service_account.composer[0].email}"
 }
 
 # ---------------------------------------------------------
