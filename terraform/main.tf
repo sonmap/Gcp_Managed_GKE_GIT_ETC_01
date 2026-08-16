@@ -85,7 +85,7 @@ resource "google_container_cluster" "autopilot" {
       service_account = google_service_account.gke_node[0].email
     }
   }
-  
+
   deletion_protection = false
 
   release_channel { channel = "REGULAR" }
